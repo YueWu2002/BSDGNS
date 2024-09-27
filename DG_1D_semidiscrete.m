@@ -34,7 +34,9 @@ for k = 1: mesh.Nx-1
     hxr = mesh.nodes(mesh.elems(2,idr)) - mesh.nodes(mesh.elems(1,idr));
     Jxr = [hxr/2.0];
 
-    [Fn, S] = Euler_HLLC_flux(Tr*u(:,:,idl), Tl*u(:,:,idr), [1.0, 0.0, 0.0], gamma);
+    LEFTc = Tr*u(:,:,idl);
+    RIGHTc = Tl*u(:,:,idr);
+    [Fn, S] = Euler_HLLC_flux_primitive(Euler_con2pri(LEFTc, gamma), Euler_con2pri(RIGHTc, gamma), [1.0, 0.0, 0.0], gamma);
 
     max_dtx(idl) = min(max_dtx(idl), hxl/S);
     max_dtx(idr) = min(max_dtx(idr), hxr/S);
@@ -57,7 +59,9 @@ Jxl = [hxl/2.0];
 hxr = mesh.nodes(mesh.elems(2,idr)) - mesh.nodes(mesh.elems(1,idr));
 Jxr = [hxr/2.0];
 
-[Fn, S] = Euler_HLLC_flux(Tr*u(:,:,idl), Tl*u(:,:,idr), [1.0, 0.0, 0.0], gamma);
+LEFTc = Tr*u(:,:,idl);
+RIGHTc = Tl*u(:,:,idr);
+[Fn, S] = Euler_HLLC_flux_primitive(Euler_con2pri(LEFTc, gamma), Euler_con2pri(RIGHTc, gamma), [1.0, 0.0, 0.0], gamma);
 
 max_dtx(idl) = min(max_dtx(idl), hxl/S);
 max_dtx(idr) = min(max_dtx(idr), hxr/S);
@@ -71,14 +75,20 @@ ut(:,:,idr) = ut(:,:,idr) + (1.0./det(Jxr)) .* (Minv * (+Tl'*1*Fn(:)'));
 idr = 1;
 hxr = mesh.nodes(mesh.elems(2,idr)) - mesh.nodes(mesh.elems(1,idr));
 Jxr = [hxr/2.0];
-[Fn, S] = Euler_HLLC_flux(Tl*u(:,:,idr), Tl*u(:,:,idr), [1.0, 0.0, 0.0], gamma); % extrapolation 
+
+LEFTc = Tl*u(:,:,idr); % extrapolation 
+RIGHTc = Tl*u(:,:,idr);
+[Fn, S] = Euler_HLLC_flux_primitive(Euler_con2pri(LEFTc, gamma), Euler_con2pri(RIGHTc, gamma), [1.0, 0.0, 0.0], gamma);
 max_dtx(idr) = min(max_dtx(idr), hxr/S);
 ut(:,:,idr) = ut(:,:,idr) + (1.0./det(Jxr)) .* (Minv * (+Tl'*1*Fn(:)'));
 
 idl = mesh.Nx;
 hxl = mesh.nodes(mesh.elems(2,idl)) - mesh.nodes(mesh.elems(1,idl));
 Jxl = [hxl/2.0];
-[Fn, S] = Euler_HLLC_flux(Tr*u(:,:,idl), Tr*u(:,:,idl), [1.0, 0.0, 0.0], gamma); % extrapolation 
+
+LEFTc = Tr*u(:,:,idl);
+RIGHTc = Tr*u(:,:,idl); % extrapolation
+[Fn, S] = Euler_HLLC_flux_primitive(Euler_con2pri(LEFTc, gamma), Euler_con2pri(RIGHTc, gamma), [1.0, 0.0, 0.0], gamma);
 max_dtx(idl) = min(max_dtx(idl), hxl/S);
 ut(:,:,idl) = ut(:,:,idl) + (1.0./det(Jxl)) .* (Minv * (-Tr'*1*Fn(:)'));
 

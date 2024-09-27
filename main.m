@@ -19,7 +19,7 @@ for k = 1: mesh.Nx
 end
 %}
 
-% shock tube problem, check point T=1.3
+% Lax shock tube problem, check point T=1.3, domain = [-5,5]
 for k = 1: mesh.Nx
     for i = 1: p+1
         if mesh.xx(i,k) < 0.0
