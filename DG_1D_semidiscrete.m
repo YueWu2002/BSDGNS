@@ -36,7 +36,8 @@ for k = 1: mesh.Nx-1
 
     LEFTc = Tr*u(:,:,idl);
     RIGHTc = Tl*u(:,:,idr);
-    [Fn, S] = Euler_HLLC_flux_primitive(Euler_con2pri(LEFTc, gamma), Euler_con2pri(RIGHTc, gamma), [1.0, 0.0, 0.0], gamma);
+    % [Fn, S] = Euler_HLLC_flux_primitive(Euler_con2pri(LEFTc, gamma), Euler_con2pri(RIGHTc, gamma), [1.0, 0.0, 0.0], gamma);
+    [Fn, S] = Euler_LF_flux_primitive(Euler_con2pri(LEFTc, gamma), Euler_con2pri(RIGHTc, gamma), [1.0, 0.0, 0.0], gamma);
 
     max_dtx(idl) = min(max_dtx(idl), hxl/S);
     max_dtx(idr) = min(max_dtx(idr), hxr/S);
