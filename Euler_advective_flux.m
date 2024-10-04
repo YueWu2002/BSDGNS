@@ -1,43 +1,23 @@
-function [Fx, Fy, Fz] = Euler_advective_flux(U, p)
-% [Fx, Fy, Fz] = Euler_advective_flux(U, p)
-%   compute the advective flux of the Euler equation in conservative form
-%   (for general equation of state)
+function [F] = Euler_advective_flux(U, p, normal, dim)
+% [F] = Euler_advective_flux(U, p, normal, dim)
+%   compute the advective flux of the Euler equation in conservative form in the normal direction
+%   (support any equation of state)
+%   (support any problem dimension)
+%   (support vectorized input)
 % 
-% input: (scalar)
-%   U:          conservative variables
-%   p:          pressure
+% input: 
+%   U:          conservative variables, size = [dim+2, ...]
+%   p:          pressure,               size = [1, ...]
+%   normal:     unit normal vector,     size = [dim, ...]
+%   dim:        problem dimension,      integer scalar
 % 
 % output:
-%   Fx, Fy, Fz: flux in x,y,z directions
+%   F:          flux in the normal direction, size = [dim+2, ...] (same as U)
 
-U = U(:);
-
-Fx = nan(5,1);
-vx = U(2)/U(1);
-Fx(1) = U(2);
-Fx(2) = vx*U(2) + p;
-Fx(3) = vx*U(3);
-Fx(4) = vx*U(4);
-Fx(5) = (U(5) + p)*vx;
-
-if nargout > 1
-    Fy = nan(5,1);
-    vy = U(3)/U(1);
-    Fy(1) = U(3);
-    Fy(2) = vy*U(2);
-    Fy(3) = vy*U(3) + p;
-    Fy(4) = vy*U(4);
-    Fy(5) = (U(5) + p)*vy;
-
-    if nargout > 2
-        Fz = nan(5,1);
-        vz = U(4)/U(1);
-        Fz(1) = U(4);
-        Fz(2) = vz*U(2);
-        Fz(3) = vz*U(3);
-        Fz(4) = vz*U(4) + p;
-        Fz(5) = (U(5) + p)*vz;
-    end
-end
-
+input_shape = size(U); % row vector, input_shape(1) should== dim+2
+U = reshape(U, dim+2,[]);
+p = reshape(p, 1,[]); % row vector
+normal = reshape(normal, dim,[]);
+vn = dot(U(2:dim+1,:)./U(1,:), normal(1:dim,:), 1); % normal velocity (row vector)
+F = reshape(vn .* U(:,:) + p .* [zeros(1,size(U,2)); normal(1:dim,:); vn], input_shape);
 end

@@ -1,28 +1,46 @@
-function [U_roe] = Euler_Roe_average(U_l, U_r, gamma)
-% compute the Roe's average of primitive variables
-% can adapt to dimension
+function [U_roe, c_roe] = Euler_Roe_average(U_l, U_r, gamma, dim)
+% [U_roe, c_roe] = Euler_Roe_average(U_l, U_r, gamma, dim)
+%   compute the Roe's average of primitive variables and the sonic speed
+%   only support the gamma law EOS
+%   (support any problem dimension)
+%   (support vectorized input)
+% 
+% input:
+%   U_l, U_r: primitive variables, size = [dim+2, ...]
+%   gamma: the specific heat ratio in the gamma law EOS, scalar
+%   dim: problem dimension, integer scalar
+% 
+% output:
+%   U_roe:  the Roe average in primitive variables, size = [dim+2, ...] (same as U_l)
+%   c_roe:  sonic speed, size = [1, ...]
 
-d = numel(U_l) - 2;
+input_shape = size(U_l); % row vector, input_shape(1) should== dim+2
+U_l = reshape(U_l, dim+2,[]);
+U_r = reshape(U_r, dim+2,[]);
 
-rho_l = U_l(1);
-v_l = U_l(2:(d+1));
-p_l = U_l(end);
-E_l = p_l/(gamma-1.0) + 0.5*rho_l*sum(v_l(:).^2);
-H_l = (E_l + p_l) / rho_l; % enthalpy
+rho_l = U_l(1,:);
+v_l = U_l(2:dim+1,:);
+p_l = U_l(dim+2,:);
+c_l_sq = gamma*p_l./rho_l; % square of sonic speed
 
-rho_r = U_r(1);
-v_r = U_r(2:(d+1));
-p_r = U_r(end);
-E_r = p_r/(gamma-1.0) + 0.5*rho_r*sum(v_r(:).^2);
-H_r = (E_r + p_r) / rho_r; % enthalpy
+rho_r = U_r(1,:);
+v_r = U_r(2:dim+1,:);
+p_r = U_r(dim+2);
+c_r_sq = gamma*p_r./rho_r; % square of sonic speed
 
-R_roe = sqrt(rho_r/rho_l);
-rho_roe = sqrt(rho_l*rho_r);
+R_roe = sqrt(rho_r./rho_l); % row vector
 deno = 1.0 + R_roe;
-v_roe = (v_l(:) + R_roe*v_r(:)) / deno;
-H_roe = (H_l + R_roe*H_r) / deno;
-p_roe = ((gamma-1.0)/gamma)*rho_roe*(H_roe - 0.5*sum(v_roe(:).^2));
+rho_roe = sqrt(rho_l.*rho_r);
+v_roe = (v_l + R_roe.*v_r) ./ deno;
+
+% verified by Mathematica
+c_roe_sq = (0.5*(gamma-1.0)./(R_roe + 2.0 + 1.0./R_roe)) .* sum((v_l - v_r).^2, 1) + (c_l_sq + R_roe .* c_r_sq) ./ deno;
+c_roe = sqrt(c_roe_sq);
+p_roe = (rho_roe .* c_roe_sq) / gamma;
 
 U_roe = [rho_roe; v_roe; p_roe];
+
+U_roe = reshape(U_roe, input_shape);
+c_roe = reshape(c_roe, [1,input_shape(2:end)]);
 
 end

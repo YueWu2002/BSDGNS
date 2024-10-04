@@ -1,4 +1,4 @@
-function [Lmat, Rmat] = Euler_eigenmat_con(U_p, gamma)
+function [Lmat, Rmat] = Euler_eigenmat_con(U_p, gamma, dim)
 % [Lmat, Rmat] = Euler_eigenmat_con(U_p, gamma)
 % compute the left and right eigen matrices in x-direction for compressible Euler equations
 % input: primitive variables

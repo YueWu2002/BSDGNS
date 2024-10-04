@@ -39,7 +39,7 @@ for k = 1: mesh.Nx
 end
 
 
-% LF和HLLC在简单算例收敛阶测试成功
+% HLLC在简单算例收敛阶测试成功
 
 T = 1.3; % final time
 need_video = false;
